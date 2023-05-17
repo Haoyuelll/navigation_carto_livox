@@ -1,0 +1,52 @@
+<!--
+  Pasteright 2021 Tinker@Hazel
+-->
+
+<launch>
+  <!-- static map -->
+  <arg name="load_static_map" default="" />
+
+  <!-- livox config -->
+  <arg name="bd_list" default="47MDL280010125" />
+
+  <!-- set static map args -->
+  <arg if="$(eval load_static_map != '')" name="cartographer_arguments"
+    value="-load_state_filename $(find tinker_navigation)/static_maps/$(arg load_static_map)/map.pbstream" />
+  <arg if="$(eval load_static_map == '')" name="cartographer_arguments" value="" />
+
+  <!-- lidars -->
+  <include file="$(find tinker_navigation)/launch/livox_MID360.launch" />
+  <node name="livox_lidar_publisher2" pkg="livox_ros_driver2" type="livox_lidar_publisher2"
+    respawn="false" output="screen">
+    <param name="bd_list" type="string" value="$(bd_list)" />
+  </node>
+
+  <!-- tf publisher to transform livox laser and cmu frame -->
+  <node pkg="tf" type="static_transform_publisher" name="laser_static_trans"
+    args="0 0 0 0 0 0 livox_frame laser 10" />
+
+  <!-- cartographer -->
+  <!-- ref: https://readthedocs.org/projects/google-cartographer-ros/downloads/pdf/latest/ -->
+  <node name="cartographer_node" pkg="cartographer_ros"
+    type="cartographer_node"
+    args="
+          -configuration_directory $(find tinker_navigation)/config/slam
+          -configuration_basename livox_3d.lua"
+    output="screen">
+    <remap from="/livox/lidar" to="/scan" />
+  </node>
+
+  <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+    type="cartographer_occupancy_grid_node" args="-resolution 0.02"
+    output="screen" respawn="true" />
+
+  <!-- robot urdf publisher-->
+  <param name="robot_description"
+    command="xacro '$(find tinker_description)/urdf/tinker.urdf.xacro'" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <node name="rviz" pkg="rviz" type="rviz" required="true"
+    args="-d $(find cartographer_ros)/configuration_files/demo_3d.rviz" />
+
+</launch>
