@@ -17,11 +17,24 @@
 
 #### Installation:
 
+* Before installation, replace all `livox_ros_driver` in package `LiDAR_IMU_Init` with `livox_ros_driver2`. You can do this replace easily with IDE like vscode. 
+
 ```bash
+# create workspace and clone this repository
 mkdir -p tk23_navigation/src && cd tk23_navigation/src
-git clone
-cd .. && ./src/livox_ros_driver2/build.sh ROS1
+cd src && git clone git@github.com:Haoyuelll/tinker23_navigation.git
+
+# this repo depends on codes of Cpython and requires python>=3.0
+# please set the python executable path when building
+pip install Cpython
+cd .. && ./src/livox_ros_driver2/build.sh ROS1 -DPYTHON_EXECUTABLE=/usr/bin/python3
+
+# Use the following command for building workspace if you are in conda env
+cd .. && ./src/livox_ros_driver2/build.sh ROS1\
+  -DPYTHON_EXECUTABLE=$CONDA_PREFIX/bin/python3.*
 ```
+
+##### *If you occur problems while building, please refer to `project_debug.md` for solutions to common problems.*
 
 
 

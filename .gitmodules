@@ -1,3 +1,7 @@
 [submodule "livox_ros_driver2"]
 	path = livox_ros_driver2
 	url = git://github.com/Livox-SDK/livox_ros_driver2.git
+
+[submodule "lidar_imu_init"]
+	path = lidar_imu_init
+	url = git://github.com/hku-mars/LiDAR_IMU_Init.git
